@@ -15,7 +15,8 @@ class MyIdoomApi {
   /// Login to MyIdoom
   /// Returns a Map with token and user info if successful.
   Future<Map<String, dynamic>> login(String nd, String password) async {
-    final url = Uri.parse('$_baseUrl/auth/login_new');
+    // Updated to use the endpoint from the screenshot
+    final url = Uri.parse('$_baseUrl/checkHeader/login');
     final body = json.encode({
       "nd": nd,
       "password": password,
@@ -74,8 +75,9 @@ class MyIdoomApi {
 
   /// Get Account Information
   /// Requires Bearer Token
+  /// Updated to use compte_augmentation_debit for detailed info
   Future<Map<String, dynamic>> getAccountInfo(String token) async {
-    final url = Uri.parse('$_baseUrl/compte');
+    final url = Uri.parse('$_baseUrl/compte_augmentation_debit');
     final headers = {
       ..._baseHeaders,
       'Authorization': 'Bearer $token',

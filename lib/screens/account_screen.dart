@@ -5,6 +5,34 @@ import '../../providers/app_state.dart';
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
+  void _showSpeedsDialog(BuildContext context, String speedListStr) {
+    final speeds = speedListStr.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('🚀 Available Speeds'),
+        content: speeds.isNotEmpty
+          ? SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: speeds.map((s) => ListTile(
+                  leading: const Icon(Icons.speed, color: Colors.blue),
+                  title: Text(s),
+                )).toList(),
+              ),
+            )
+          : const Text("ℹ️ No clear speed upgrade information found in your account data."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          )
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
@@ -29,7 +57,7 @@ class AccountScreen extends StatelessWidget {
                     '${info['prenom'] ?? ''} ${info['nom'] ?? ''}',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
-                  Text(info['nd'] ?? 'Unknown ND'),
+                  Text(info['nd'] ?? 'Unknown ND', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 10),
                   Text(
                     '${info['credit'] ?? '0'} DA',
@@ -43,20 +71,30 @@ class AccountScreen extends StatelessWidget {
           const SizedBox(height: 16),
           _buildDetailRow(context, 'Offer', info['offre']),
           _buildDetailRow(context, 'Speed', '${info['speed'] ?? '?'} Mbps'),
+          _buildDetailRow(context, 'Status', info['status']),
+          _buildDetailRow(context, 'Type', info['type1']),
+          const Divider(),
           _buildDetailRow(context, 'Days Remaining', '${info['balance'] ?? '0'} Days'),
           _buildDetailRow(context, 'Expiry Date', info['dateexp']),
+          const Divider(),
           _buildDetailRow(context, 'NCLI', info['ncli']),
+          _buildDetailRow(context, 'Mobile', info['mobile']),
+          _buildDetailRow(context, 'Email', info['email']),
           _buildDetailRow(context, 'Address', info['adresse']),
 
           const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () {
-              // Implement logic to check max speed if available in API
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Speed check coming soon')));
-            },
-            icon: const Icon(Icons.speed),
-            label: const Text('Check Max Speed')
-          ),
+          if (info['listOffreDebit'] != null)
+            ElevatedButton.icon(
+              onPressed: () => _showSpeedsDialog(context, info['listOffreDebit'].toString()),
+              icon: const Icon(Icons.rocket_launch),
+              label: const Text('Check Available Speeds')
+            )
+          else
+             ElevatedButton.icon(
+              onPressed: null,
+              icon: const Icon(Icons.rocket_launch),
+              label: const Text('Speed Check Unavailable')
+            ),
 
           const SizedBox(height: 16),
           OutlinedButton.icon(
@@ -78,7 +116,7 @@ class AccountScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-          Text(value ?? 'N/A'),
+          Expanded(child: Text(value ?? 'N/A', textAlign: TextAlign.end, overflow: TextOverflow.ellipsis)),
         ],
       ),
     );
