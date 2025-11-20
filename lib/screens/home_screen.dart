@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
+import 'login_screen.dart';
+import 'dashboard_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -103,11 +105,32 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
 
+    // If logged in, we can show the dashboard or allow access to it.
+    // For now, let's keep the tabs as main view but add an icon to access dashboard/login.
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('AT DZ Recharge'),
+          actions: [
+             if (state.isLoggedIn)
+              IconButton(
+                icon: const Icon(Icons.dashboard),
+                tooltip: 'My Idoom Dashboard',
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const DashboardScreen()));
+                },
+              )
+            else
+              TextButton.icon(
+                onPressed: () {
+                   Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                },
+                icon: const Icon(Icons.login),
+                label: const Text('My Idoom'),
+              ),
+          ],
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Internet (ADSL/Fibre)', icon: Icon(Icons.router)),
